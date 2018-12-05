@@ -4,8 +4,8 @@ main :: IO ()
 main = do
   contents <- getContents
   let ints = cycle $ stringToIntList $ init $ splitOn "\n" contents
-  let sums = sumPrev ints
-  print $ findDup $ sums
+  print $ stringToIntList $ init $ splitOn "\n" contents
+  print $ findFirstDupSum ints
 
 
 stringToIntList :: [String] -> [Integer]
@@ -14,14 +14,10 @@ stringToIntList str = [if head x == '+'
                         else read( x )
                       | x <- str]
 
-sumPrev :: [Integer] -> [Integer]
-sumPrev [] = []
-sumPrev arr = sumPrev ( init arr ) ++ [( sum $ init arr) + last arr]
+findFirstDupSum :: [Integer] -> Integer
+findFirstDupSum arr = _findFirstDupSum arr [0]
 
-findDup :: [Integer] -> Integer
-findDup arr = findDup_h arr 0
-
-findDup_h :: [Integer] -> Int -> Integer
-findDup_h arr i
-  | any ((arr !! i) ==) (fst $ splitAt i arr) = arr !! i
-  | otherwise = findDup_h arr (i + 1)
+_findFirstDupSum :: [Integer] -> [Integer] -> Integer
+_findFirstDupSum arr sums
+  | (head arr + last sums) `elem` sums = (head arr + last sums)
+  | otherwise = _findFirstDupSum (tail arr) (sums ++ [(head arr + last sums)])
