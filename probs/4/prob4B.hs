@@ -1,5 +1,6 @@
 import Data.List.Split
 import Data.List
+import Data.Ord
 
 data Guard = Guard {gid :: Integer,
                     minutes :: [Integer]
@@ -9,23 +10,20 @@ main :: IO ()
 main = do
   contents <- getContents
   let logs = sortBy compTime (init $ splitOn "\n" contents)
-  print logs
-  print $ getGuardMins logs (nub $ getGuardLists logs) 0
-  print "Worst Guard:\n"
-  let worst = mostSleep $ getGuardMins logs (getGuardLists logs) 0
-  print worst
-  print ((gid worst) * snd (maximum [a | a <- zip (minutes worst) [0..] ]))
+  --print logs
+  print (getGuardMins logs (nub $ getGuardLists logs) 0)
+  let guardsMaxMins = guardMaxMins $ getGuardMins logs (nub $ getGuardLists logs) 0
+  print guardsMaxMins
+  print $ maximumBy (comparing snd) guardsMaxMins
 
-mostSleep :: [Guard] -> Guard
-mostSleep guardL = maximumBy compGuards guardL
+guardMaxMins :: [Guard] -> [(Integer, (Integer, Integer))]
+guardMaxMins ga
+  | null ga = []
+  | otherwise = (cgid, maxminute) : guardMaxMins (tail ga)
+  where currentG = head ga
+        cgid = gid currentG
+        maxminute = maximum [a | a <- zip (minutes currentG) [0..]]
 
-compGuards :: Guard -> Guard -> Ordering
-compGuards g1 g2
-  | sg1 > sg2 = GT
-  | sg1 < sg2 = LT
-  | otherwise = EQ
-  where sg1 = sum $ minutes g1
-        sg2 = sum $ minutes g2
 
 getGuardMins :: [String] -> [Guard] -> Integer -> [Guard]
 getGuardMins logs guardL guardid
